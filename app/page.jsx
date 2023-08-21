@@ -3,7 +3,7 @@ import Link from "next/link";
 
 export default function Home() {
   return (
-    <main className="flex h-screen w-full">
+    <main className="h-screen w-full flex justify-center items-center">
       <div className="container flex justify-center items-center">
         <div className="border-2 border-gray-600 rounded-md p-10 text-xl">
           <Link
@@ -14,9 +14,9 @@ export default function Home() {
           </Link>
           <Link
             className="block w-full px-6 py-3 hover:opacity-70 bg-gray-300 text-center rounded-md"
-            href="/setting"
+            href="/settings"
           >
-            Setting
+            Settings
           </Link>
         </div>
       </div>
