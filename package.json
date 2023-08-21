@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@atlaskit/toggle": "^12.6.11",
     "autoprefixer": "10.4.15",
     "eslint": "8.47.0",
     "eslint-config-next": "13.4.19",
