@@ -22,15 +22,121 @@ const StartPage = () => {
     return () => clearInterval(interval);
   }, [countDown]);
 
-  useEffect(() => {
-    const colors = JSON.parse(localStorage.getItem("colors") ?? "");
-    const sounds = JSON.parse(localStorage.getItem("sounds") ?? "");
+  const [displayedElement, setDisplayedElement] = useState(null);
+  const [currentColor, setCurrentColor] = useState("#fff");
+  const [currentInstruction, setCurrentInstruction] = useState("");
+  const [gameDuration] = useState(0.5 * 60 * 1000); // 0.5 minutes in milliseconds
+  const [intervalRange] = useState([500, 2000]); // Random interval range in milliseconds
 
-    if (!colors && !sounds) {
+  useEffect(() => {
+    const storageColors = localStorage.getItem("colors");
+    const storageSounds = localStorage.getItem("sounds");
+
+    if (!storageColors && !storageSounds) {
       setHasSettingErr(true);
       setIsLoading(false);
+      return;
     }
-  }, []);
+
+    const colors = JSON.parse(storageColors).map((color) => ({
+      ...color,
+      rate: 50,
+    }));
+    const sounds = JSON.parse(storageSounds)
+      .filter((sound) => sound.isChecked)
+      .map((sound) => ({ ...sound, rate: 80 }));
+
+    // Calculate total rates for both colors and sounds
+    const totalColorRate = colors.reduce(
+      (total, color) => total + color.rate,
+      0
+    );
+    const totalSoundRate = sounds.reduce(
+      (total, sound) => total + sound.rate,
+      0
+    );
+
+    let gameInterval;
+    let gameTimeout;
+    const startGame = () => {
+      let lastDisplayedElement = null;
+      gameInterval = setInterval(() => {
+        const isColor =
+          Math.random() < totalColorRate / (totalColorRate + totalSoundRate);
+
+        let newElement;
+        if (isColor) {
+          newElement = getRandomElement(colors, totalColorRate);
+        } else {
+          newElement = getRandomElement(sounds, totalSoundRate);
+        }
+
+        while (
+          newElement === lastDisplayedElement ||
+          newElement === displayedElement
+        ) {
+          newElement = isColor
+            ? getRandomElement(colors, totalColorRate)
+            : getRandomElement(sounds, totalSoundRate);
+        }
+
+        setDisplayedElement(newElement);
+        lastDisplayedElement = newElement;
+
+        if (newElement) {
+          if (isColor) {
+            displayColor(newElement);
+          } else {
+            playSound(newElement);
+          }
+        }
+      }, Math.floor(Math.random() * (intervalRange[1] - intervalRange[0] + 1)) + intervalRange[0]);
+
+      gameTimeout = setTimeout(() => {
+        clearInterval(gameInterval);
+      }, gameDuration);
+    };
+
+    setIsLoading(false);
+
+    if (gameStarted) {
+      startGame();
+    }
+
+    return () => {
+      clearInterval(gameInterval);
+      clearInterval(gameTimeout);
+    };
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [gameStarted]);
+
+  function getRandomElement(elements, totalRate) {
+    const randomNumber = Math.random() * totalRate;
+    let cumulativeRate = 0;
+
+    for (const element of elements) {
+      cumulativeRate += element.rate;
+      if (randomNumber <= cumulativeRate) {
+        return element;
+      }
+    }
+  }
+
+  function displayColor(color) {
+    setCurrentColor(color.code);
+    setCurrentInstruction(color.label);
+
+    setTimeout(() => {
+      setCurrentColor("#fff");
+    }, 400);
+  }
+
+  function playSound(sound) {
+    const audio = new Audio(`/sounds/${sound.id}.mp3`);
+    audio.play();
+    setCurrentInstruction(sound.label);
+  }
 
   function onFinishCountdown() {
     setGameStarted(true);
@@ -50,12 +156,27 @@ const StartPage = () => {
     );
   }
 
+  if (!gameStarted) {
+    return (
+      <main>
+        <div className="container h-screen flex justify-center items-center">
+          {!gameStarted && (
+            <div className="text-6xl font-bold">{countDown}</div>
+          )}
+        </div>
+      </main>
+    );
+  }
+
   return (
     <main>
-      <div className="container h-screen flex justify-center items-center">
-        {!gameStarted && <div className="text-6xl font-bold">{countDown}</div>}
-
-        {gameStarted && <div className="text-3xl font-bold">game started!</div>}
+      <div
+        className="container h-screen"
+        style={{ backgroundColor: currentColor }}
+      >
+        <div className="text-2xl font-semibold py-4 bg-white text-center">
+          {currentInstruction}
+        </div>
       </div>
     </main>
   );

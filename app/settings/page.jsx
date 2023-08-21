@@ -26,11 +26,6 @@ const SettingPage = () => {
       isChecked: false,
     },
     {
-      id: "s2",
-      label: "",
-      isChecked: false,
-    },
-    {
       id: "s3",
       label: "",
       isChecked: false,
