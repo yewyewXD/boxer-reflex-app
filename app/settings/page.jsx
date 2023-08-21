@@ -2,13 +2,14 @@
 
 import AddButton from "@/components/AddButton";
 import { useRouter } from "next/navigation";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { HexColorPicker } from "react-colorful";
 import { v4 as uuid } from "uuid";
 import Toggle from "@atlaskit/toggle";
 
 const SettingPage = () => {
   const router = useRouter();
+  const [isLoading, setIsLoading] = useState(true);
   const [canSave, setCanSave] = useState(false);
 
   const [showColorPicker, setShowColorPicker] = useState(true);
@@ -70,6 +71,21 @@ const SettingPage = () => {
       isChecked: false,
     },
   ]);
+
+  useEffect(() => {
+    const storageColors = localStorage.getItem("colors");
+    const storageSounds = localStorage.getItem("sounds");
+
+    if (storageColors) {
+      setColors(JSON.parse(storageColors));
+    }
+
+    if (storageSounds) {
+      setSounds(JSON.parse(storageSounds));
+    }
+
+    setIsLoading(false);
+  }, []);
 
   function goBack() {
     router.push("/");
@@ -144,6 +160,8 @@ const SettingPage = () => {
     });
     setCanSave(true);
   }
+
+  if (isLoading) return null;
 
   return (
     <main className="w-full">
