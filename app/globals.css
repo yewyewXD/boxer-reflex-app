@@ -6,6 +6,7 @@
   margin: 0 auto;
 }
 
+button:disabled,
 button:hover {
   opacity: 70%;
 }

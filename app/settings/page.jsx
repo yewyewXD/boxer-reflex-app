@@ -9,17 +9,13 @@ import Toggle from "@atlaskit/toggle";
 
 const SettingPage = () => {
   const router = useRouter();
+  const [canSave, setCanSave] = useState(false);
+
   const [showColorPicker, setShowColorPicker] = useState(true);
   const [newColor, setNewColor] = useState("#fff");
   const [newColorName, setNewColorName] = useState("");
 
-  const [colors, setColors] = useState([
-    {
-      id: "x",
-      code: "#fff",
-      label: "Left kick",
-    },
-  ]);
+  const [colors, setColors] = useState([]);
   const [showAddColor, setShowAddColor] = useState(false);
 
   const [sounds, setSounds] = useState([
@@ -74,18 +70,20 @@ const SettingPage = () => {
       isChecked: false,
     },
   ]);
-  const [showAddSound, setShowAddSound] = useState(false);
 
   function goBack() {
     router.push("/");
   }
 
   function onSave() {
-    console.log("safe");
+    setCanSave(false);
+    localStorage.setItem("colors", JSON.stringify(colors));
+    localStorage.setItem("sounds", JSON.stringify(sounds));
   }
 
   function addColor() {
     setShowAddColor(true);
+    setCanSave(true);
   }
 
   function onSaveColor(e) {
@@ -130,6 +128,7 @@ const SettingPage = () => {
       newSounds[index] = newSound;
       return newSounds;
     });
+    setCanSave(true);
   }
 
   function updateSoundLabel(id, text) {
@@ -143,10 +142,11 @@ const SettingPage = () => {
       newSounds[index] = newSound;
       return newSounds;
     });
+    setCanSave(true);
   }
 
   return (
-    <main className="h-screen w-full">
+    <main className="w-full">
       <div className="w-full flex items-center h-16 border-b-2 border-gray-600">
         <div className="container flex justify-between items-center">
           <h1 className="text-xl font-bold">
@@ -157,12 +157,17 @@ const SettingPage = () => {
           </h1>
 
           <button
-            className="px-4 py-2 bg-green-400 rounded-md"
+            disabled={!canSave}
+            className="px-4 py-2 bg-green-400 rounded-md disabled:bg-gray-200 disabled:cursor-not-allowed text-sm font-medium"
             onClick={onSave}
           >
-            Save
+            {canSave ? "Save" : "Saved"}
           </button>
         </div>
+      </div>
+
+      <div className="text-center font-medium border-b-2 border-gray-600 text-sm py-1 bg-red-100">
+        ⚠️Save before you leave!
       </div>
 
       {/* Colors Section */}
@@ -173,9 +178,10 @@ const SettingPage = () => {
           </div>
           {colors.map((color, index) => (
             <div className="mb-4 flex items-center" key={color.id}>
-              <span className="text-lg font-bold w-7">{index + 1}.</span>
+              <span className="font-bold w-6">{index + 1}.</span>
               <div
                 style={{ backgroundColor: color.code }}
+                onClick={() => alert("Color can't be change once added")}
                 className="border-2 border-black w-10 h-5 rounded-md"
               />
               <span className="ml-3 font-medium leading-none">
@@ -194,9 +200,7 @@ const SettingPage = () => {
 
           {showAddColor && (
             <form className="mb-4 flex items-center" onSubmit={onSaveColor}>
-              <span className="text-lg font-bold w-7">
-                {colors.length + 1}.
-              </span>
+              <span className="font-bold w-6">{colors.length + 1}.</span>
 
               <div
                 onClick={() => setShowColorPicker((bool) => !bool)}
@@ -218,8 +222,9 @@ const SettingPage = () => {
                 type="text"
                 required
                 onChange={(e) => setNewColorName(e.target.value)}
-                className="ml-3 font-medium w-40 outline-none border-b border-black"
+                className="ml-3 font-medium w-36 outline-none border-b border-black"
                 placeholder="Left kick"
+                onFocus={() => setShowColorPicker(false)}
               />
               <div className="flex-grow flex justify-end items-center">
                 <button
@@ -241,7 +246,7 @@ const SettingPage = () => {
 
         {sounds.map((sound, index) => (
           <div className="mb-4 flex items-center" key={sound.id}>
-            <span className="text-lg font-bold w-14">
+            <span className="font-bold w-12">
               {index + 1}.{" "}
               <button onClick={() => playSound(sound.id)}> 🔉</button>
             </span>
@@ -260,6 +265,10 @@ const SettingPage = () => {
             />
           </div>
         ))}
+      </div>
+
+      <div className="text-center font-medium border-y-2 border-gray-600 text-sm py-1 bg-red-100 mb-8">
+        ⚠️Save before you leave!
       </div>
     </main>
   );
