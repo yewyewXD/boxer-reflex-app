@@ -6,6 +6,8 @@ import React, { useEffect, useState } from "react";
 import { HexColorPicker } from "react-colorful";
 import { v4 as uuid } from "uuid";
 import Toggle from "@atlaskit/toggle";
+import Slider from "react-rangeslider";
+import "react-rangeslider/lib/index.css";
 
 const SettingPage = () => {
   const router = useRouter();
@@ -16,9 +18,11 @@ const SettingPage = () => {
   const [newColor, setNewColor] = useState("#fff");
   const [newColorName, setNewColorName] = useState("");
 
+  const [colorRate, setColorRate] = useState(50);
   const [colors, setColors] = useState([]);
   const [showAddColor, setShowAddColor] = useState(false);
 
+  const [soundRate, setSoundRate] = useState(50);
   const [sounds, setSounds] = useState([
     {
       id: "s1",
@@ -72,11 +76,15 @@ const SettingPage = () => {
     const storageSounds = localStorage.getItem("sounds");
 
     if (storageColors) {
-      setColors(JSON.parse(storageColors));
+      const parsedColors = JSON.parse(storageColors);
+      setColors(parsedColors);
+      setColorRate(parsedColors[0].rate);
     }
 
     if (storageSounds) {
-      setSounds(JSON.parse(storageSounds));
+      const parsedSounds = JSON.parse(storageSounds);
+      setSounds(parsedSounds);
+      setSoundRate(parsedSounds[0].rate);
     }
 
     setIsLoading(false);
@@ -88,8 +96,20 @@ const SettingPage = () => {
 
   function onSave() {
     setCanSave(false);
-    localStorage.setItem("colors", JSON.stringify(colors));
-    localStorage.setItem("sounds", JSON.stringify(sounds));
+
+    if (colors.length) {
+      localStorage.setItem(
+        "colors",
+        JSON.stringify(colors.map((color) => ({ ...color, rate: colorRate })))
+      );
+    }
+
+    if (sounds.some((sound) => sound.isChecked)) {
+      localStorage.setItem(
+        "sounds",
+        JSON.stringify(sounds.map((sound) => ({ ...sound, rate: soundRate })))
+      );
+    }
   }
 
   function addColor() {
@@ -186,8 +206,19 @@ const SettingPage = () => {
       {/* Colors Section */}
       <div className="border-gray-600 border-b-2">
         <div className="container flex flex-col justify-center py-8 ">
-          <div className="text-xl font-semibold mb-4 text-center">
-            Colors 🔴
+          <div className="text-xl font-semibold text-center">Colors 🔴</div>
+          <div className="mb-4">
+            <Slider
+              min={0}
+              max={100}
+              value={colorRate}
+              onChange={(value) => {
+                setColorRate(value);
+                if (!canSave) {
+                  setCanSave(true);
+                }
+              }}
+            />
           </div>
           {colors.map((color, index) => (
             <div className="mb-4 flex items-center" key={color.id}>
@@ -254,30 +285,45 @@ const SettingPage = () => {
       </div>
 
       {/* Sounds Section */}
-      <div className="container flex flex-col justify-center items-center py-8">
-        <div className="text-xl font-semibold mb-4">Sounds 🔊</div>
+      <div className="container flex flex-col justify-center py-8">
+        <div className="text-xl font-semibold text-center">Sounds 🔊</div>
+        <div className="mb-4">
+          <Slider
+            min={0}
+            max={100}
+            value={soundRate}
+            onChange={(value) => {
+              setSoundRate(value);
+              if (!canSave) {
+                setCanSave(true);
+              }
+            }}
+          />
+        </div>
 
-        {sounds.map((sound, index) => (
-          <div className="mb-4 flex items-center" key={sound.id}>
-            <span className="font-bold w-12">
-              {index + 1}.{" "}
-              <button onClick={() => playSound(sound.id)}> 🔉</button>
-            </span>
+        <div className="flex flex-col justify-center items-center">
+          {sounds.map((sound, index) => (
+            <div className="mb-4 flex items-center" key={sound.id}>
+              <span className="font-bold w-12">
+                {index + 1}.{" "}
+                <button onClick={() => playSound(sound.id)}> 🔉</button>
+              </span>
 
-            <input
-              onChange={(e) => updateSoundLabel(sound.id, e.target.value)}
-              value={sound.label}
-              type="text"
-              className="ml-3 font-medium w-40 outline-none border-b border-black"
-              placeholder="Left block"
-            />
+              <input
+                onChange={(e) => updateSoundLabel(sound.id, e.target.value)}
+                value={sound.label}
+                type="text"
+                className="ml-3 font-medium w-40 outline-none border-b border-black"
+                placeholder="Left block"
+              />
 
-            <Toggle
-              isChecked={sound.isChecked}
-              onChange={() => toggleSound(sound.id)}
-            />
-          </div>
-        ))}
+              <Toggle
+                isChecked={sound.isChecked}
+                onChange={() => toggleSound(sound.id)}
+              />
+            </div>
+          ))}
+        </div>
       </div>
 
       <div className="text-center font-medium border-y-2 border-gray-600 text-sm py-1 bg-red-100 mb-8">

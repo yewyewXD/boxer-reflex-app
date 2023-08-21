@@ -32,19 +32,14 @@ const StartPage = () => {
     const storageColors = localStorage.getItem("colors");
     const storageSounds = localStorage.getItem("sounds");
 
-    if (!storageColors && !storageSounds) {
+    if (!storageColors || !storageSounds) {
       setHasSettingErr(true);
       setIsLoading(false);
       return;
     }
 
-    const colors = JSON.parse(storageColors).map((color) => ({
-      ...color,
-      rate: 50,
-    }));
-    const sounds = JSON.parse(storageSounds)
-      .filter((sound) => sound.isChecked)
-      .map((sound) => ({ ...sound, rate: 80 }));
+    const colors = JSON.parse(storageColors);
+    const sounds = JSON.parse(storageSounds).filter((sound) => sound.isChecked);
 
     // Calculate total rates for both colors and sounds
     const totalColorRate = colors.reduce(
@@ -148,7 +143,7 @@ const StartPage = () => {
     return (
       <main>
         <div className="container h-screen flex justify-center items-center">
-          <div className="text-3xl font-bold">
+          <div className="text-3xl font-bold text-center">
             Please configure your settings first.
           </div>
         </div>
