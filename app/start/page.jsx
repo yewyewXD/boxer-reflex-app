@@ -2,6 +2,13 @@
 
 import React, { useEffect, useState } from "react";
 
+const GAME_MIN = 2;
+const gameDuration = GAME_MIN * 60 * 1000; // 2 minutes in milliseconds
+const gameDurationSeconds = GAME_MIN * 60; // 2 minutes in milliseconds
+const minInterval = 300;
+const maxInterval = 2000;
+const intervalRange = [minInterval, maxInterval]; // Random interval range in milliseconds
+
 const StartPage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [hasSettingErr, setHasSettingErr] = useState(false);
@@ -25,8 +32,7 @@ const StartPage = () => {
   const [displayedElement, setDisplayedElement] = useState(null);
   const [currentColor, setCurrentColor] = useState("#fff");
   const [currentInstruction, setCurrentInstruction] = useState("");
-  const [gameDuration] = useState(0.5 * 60 * 1000); // 0.5 minutes in milliseconds
-  const [intervalRange] = useState([500, 2000]); // Random interval range in milliseconds
+  const [secondsLeft, setSecondsLeft] = useState(gameDurationSeconds);
 
   useEffect(() => {
     const storageColors = localStorage.getItem("colors");
@@ -53,6 +59,7 @@ const StartPage = () => {
 
     let gameInterval;
     let gameTimeout;
+
     const startGame = () => {
       let lastDisplayedElement = null;
       gameInterval = setInterval(() => {
@@ -106,6 +113,24 @@ const StartPage = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [gameStarted]);
 
+  // Game count down
+  useEffect(() => {
+    if (!gameStarted) return;
+
+    const gameCountdown = setInterval(() => {
+      setSecondsLeft((sec) => sec - 1);
+    }, 1000);
+
+    const gameTimeout = setTimeout(() => {
+      clearInterval(gameCountdown);
+    }, gameDuration);
+
+    return () => {
+      clearInterval(gameCountdown);
+      clearInterval(gameTimeout);
+    };
+  }, [gameStarted]);
+
   function getRandomElement(elements, totalRate) {
     const randomNumber = Math.random() * totalRate;
     let cumulativeRate = 0;
@@ -124,7 +149,7 @@ const StartPage = () => {
 
     setTimeout(() => {
       setCurrentColor("#fff");
-    }, 400);
+    }, minInterval - 50);
   }
 
   function playSound(sound) {
@@ -142,7 +167,7 @@ const StartPage = () => {
   if (hasSettingErr) {
     return (
       <main>
-        <div className="container h-screen flex justify-center items-center">
+        <div className="h-screen flex justify-center items-center">
           <div className="text-3xl font-bold text-center">
             Please configure your settings first.
           </div>
@@ -166,11 +191,15 @@ const StartPage = () => {
   return (
     <main>
       <div
-        className="container h-screen"
+        className="container h-screen flex flex-col justify-between"
         style={{ backgroundColor: currentColor }}
       >
-        <div className="text-2xl font-semibold py-4 bg-white text-center">
+        <div className="text-lg font-semibold py-2 bg-white text-center">
           {currentInstruction}
+        </div>
+
+        <div className="text-lg font-semibold py-2 bg-white text-center">
+          Time Left: {secondsLeft}s
         </div>
       </div>
     </main>
