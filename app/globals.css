@@ -5,3 +5,13 @@
 .container {
   margin: 0 auto;
 }
+
+button:hover {
+  opacity: 70%;
+}
+
+@media (max-width: 639.98px) {
+  .container {
+    max-width: 95%;
+  }
+}
