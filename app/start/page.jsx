@@ -3,52 +3,6 @@
 import { useSearchParams } from "next/navigation";
 import React, { useEffect, useState } from "react";
 
-const arrowElements = [
-  {
-    id: "arrowleft",
-    code: "url(/images/arrowleft.jpg) no-repeat center center / contain",
-    label: "",
-    rate: 50,
-  },
-  {
-    id: "arrowright",
-    code: "url(/images/arrowright.jpg) no-repeat center center / contain",
-    label: "",
-    rate: 50,
-  },
-  {
-    id: "arrowup",
-    code: "url(/images/arrowup.jpg) no-repeat center center / contain",
-    label: "",
-    rate: 50,
-  },
-  {
-    id: "arrowup2",
-    code: "url(/images/arrowup2.png) no-repeat center center / contain",
-    label: "",
-    rate: 50,
-  },
-  {
-    id: "arrowdown",
-    code: "url(/images/arrowdown.png) no-repeat center center / contain",
-    label: "",
-    rate: 50,
-  },
-  {
-    id: "arrowdown2",
-    code: "url(/images/arrowdown2.png) no-repeat center center / contain",
-    label: "",
-    rate: 50,
-  },
-
-  {
-    id: "arrowturn",
-    code: "url(/images/arrowturn.jpg) no-repeat center center / contain",
-    label: "",
-    rate: 50,
-  },
-];
-
 const StartPage = () => {
   const searchParams = useSearchParams();
   const GAME_MIN = +searchParams.get("minute");
@@ -88,14 +42,15 @@ const StartPage = () => {
   useEffect(() => {
     const storageColors = localStorage.getItem("colors");
     const storageSounds = localStorage.getItem("sounds");
+    const storageArrows = localStorage.getItem("arrows");
 
-    if (!storageColors || !storageSounds) {
+    if (!storageColors || !storageSounds || !storageArrows) {
       setHasSettingErr(true);
       setIsLoading(false);
       return;
     }
 
-    const colors = [...JSON.parse(storageColors), ...arrowElements];
+    const colors = [...JSON.parse(storageColors), ...storageArrows];
     const sounds = JSON.parse(storageSounds).filter((sound) => sound.isChecked);
     const allElements = [...colors, ...sounds];
 
@@ -169,7 +124,7 @@ const StartPage = () => {
   }, [gameStarted]);
 
   function getRandomElement(elements) {
-    const totalRate = allElements.reduce(
+    const totalRate = elements.reduce(
       (total, element) => total + element.rate,
       0
     );

@@ -6,7 +6,63 @@ import React, { useEffect, useState } from "react";
 import { HexColorPicker } from "react-colorful";
 import { v4 as uuid } from "uuid";
 import Toggle from "@atlaskit/toggle";
-import Slider from "react-rangeslider";
+
+const defaultSounds = [
+  {
+    id: "s1",
+    label: "",
+    isChecked: false,
+    rate: 50,
+  },
+  {
+    id: "s3",
+    label: "",
+    isChecked: false,
+    rate: 50,
+  },
+  {
+    id: "s4",
+    label: "",
+    isChecked: false,
+    rate: 50,
+  },
+  {
+    id: "s5",
+    label: "",
+    isChecked: false,
+    rate: 50,
+  },
+  {
+    id: "s6",
+    label: "",
+    isChecked: false,
+    rate: 50,
+  },
+  {
+    id: "s7",
+    label: "",
+    isChecked: false,
+    rate: 50,
+  },
+  {
+    id: "s8",
+    label: "",
+    isChecked: false,
+    rate: 50,
+  },
+  {
+    id: "s9",
+    label: "",
+    isChecked: false,
+    rate: 50,
+  },
+  {
+    id: "s10",
+    label: "",
+    isChecked: false,
+    rate: 50,
+  },
+];
 
 const SettingPage = () => {
   const router = useRouter();
@@ -17,58 +73,10 @@ const SettingPage = () => {
   const [newColor, setNewColor] = useState("#fff");
   const [newColorName, setNewColorName] = useState("");
 
-  const [colorRate, setColorRate] = useState(50);
   const [colors, setColors] = useState([]);
   const [showAddColor, setShowAddColor] = useState(false);
 
-  const [soundRate, setSoundRate] = useState(50);
-  const [sounds, setSounds] = useState([
-    {
-      id: "s1",
-      label: "",
-      isChecked: false,
-    },
-    {
-      id: "s3",
-      label: "",
-      isChecked: false,
-    },
-    {
-      id: "s4",
-      label: "",
-      isChecked: false,
-    },
-    {
-      id: "s5",
-      label: "",
-      isChecked: false,
-    },
-    {
-      id: "s6",
-      label: "",
-      isChecked: false,
-    },
-    {
-      id: "s7",
-      label: "",
-      isChecked: false,
-    },
-    {
-      id: "s8",
-      label: "",
-      isChecked: false,
-    },
-    {
-      id: "s9",
-      label: "",
-      isChecked: false,
-    },
-    {
-      id: "s10",
-      label: "",
-      isChecked: false,
-    },
-  ]);
+  const [sounds, setSounds] = useState(defaultSounds);
 
   useEffect(() => {
     const storageColors = localStorage.getItem("colors");
@@ -77,13 +85,11 @@ const SettingPage = () => {
     if (storageColors) {
       const parsedColors = JSON.parse(storageColors);
       setColors(parsedColors);
-      setColorRate(parsedColors[0].rate);
     }
 
     if (storageSounds) {
       const parsedSounds = JSON.parse(storageSounds);
       setSounds(parsedSounds);
-      setSoundRate(parsedSounds[0].rate);
     }
 
     setIsLoading(false);
@@ -99,20 +105,34 @@ const SettingPage = () => {
     if (colors.length) {
       localStorage.setItem(
         "colors",
-        JSON.stringify(colors.map((color) => ({ ...color, rate: colorRate })))
+        JSON.stringify(colors.map((color) => ({ ...color })))
       );
     }
 
     if (sounds.some((sound) => sound.isChecked)) {
       localStorage.setItem(
         "sounds",
-        JSON.stringify(sounds.map((sound) => ({ ...sound, rate: soundRate })))
+        JSON.stringify(sounds.map((sound) => ({ ...sound })))
       );
     }
   }
 
   function addColor() {
     setShowAddColor(true);
+    setCanSave(true);
+  }
+
+  function updateColorRate(id, num) {
+    setColors((prevColors) => {
+      const newColors = [...prevColors];
+      const index = newColors.findIndex((color) => color.id === id);
+      const newColor = {
+        ...newColors[index],
+        rate: num,
+      };
+      newColors[index] = newColor;
+      return newColors;
+    });
     setCanSave(true);
   }
 
@@ -175,6 +195,20 @@ const SettingPage = () => {
     setCanSave(true);
   }
 
+  function updateSoundRate(id, num) {
+    setSounds((prevSounds) => {
+      const newSounds = [...prevSounds];
+      const index = newSounds.findIndex((sound) => sound.id === id);
+      const newSound = {
+        ...newSounds[index],
+        rate: num,
+      };
+      newSounds[index] = newSound;
+      return newSounds;
+    });
+    setCanSave(true);
+  }
+
   if (isLoading) return null;
 
   return (
@@ -205,20 +239,10 @@ const SettingPage = () => {
       {/* Colors Section */}
       <div className="border-gray-600 border-b-2">
         <div className="container flex flex-col justify-center py-8 ">
-          <div className="text-xl font-semibold text-center">Colors 🔴</div>
-          <div className="mb-4">
-            <Slider
-              min={0}
-              max={100}
-              value={colorRate}
-              onChange={(value) => {
-                setColorRate(value);
-                if (!canSave) {
-                  setCanSave(true);
-                }
-              }}
-            />
+          <div className="text-xl font-semibold text-center mb-4">
+            Colors 🔴
           </div>
+
           {colors.map((color, index) => (
             <div className="mb-4 flex items-center" key={color.id}>
               <span className="font-bold w-6">{index + 1}.</span>
@@ -233,7 +257,9 @@ const SettingPage = () => {
 
               <div className="flex-grow flex justify-end items-center text-sm">
                 <input
-                  type="number"
+                  value={color.rate}
+                  onChange={(e) => updateColorRate(color.id, +e.target.value)}
+                  type="text"
                   placeholder="10 - 90"
                   className="border-b border-black w-16 mr-3 outline-none text-center"
                 />
@@ -291,20 +317,7 @@ const SettingPage = () => {
 
       {/* Sounds Section */}
       <div className="container flex flex-col justify-center py-8">
-        <div className="text-xl font-semibold text-center">Sounds 🔊</div>
-        <div className="mb-4">
-          <Slider
-            min={0}
-            max={100}
-            value={soundRate}
-            onChange={(value) => {
-              setSoundRate(value);
-              if (!canSave) {
-                setCanSave(true);
-              }
-            }}
-          />
-        </div>
+        <div className="text-xl font-semibold text-center mb-4">Sounds 🔊</div>
 
         <div className="flex flex-col justify-center items-center">
           {sounds.map((sound, index) => (
@@ -318,8 +331,16 @@ const SettingPage = () => {
                 onChange={(e) => updateSoundLabel(sound.id, e.target.value)}
                 value={sound.label}
                 type="text"
-                className="ml-3 font-medium w-40 outline-none border-b border-black"
+                className="ml-3 font-medium w-36 outline-none border-b border-black"
                 placeholder="Left block"
+              />
+
+              <input
+                value={sound.rate}
+                onChange={(e) => updateSoundRate(sound.id, +e.target.value)}
+                type="text"
+                placeholder="10 - 90"
+                className="border-b border-black w-16 mx-3 text-sm outline-none text-center"
               />
 
               <Toggle
