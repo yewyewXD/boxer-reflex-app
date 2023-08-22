@@ -6,63 +6,7 @@ import React, { useEffect, useState } from "react";
 import { HexColorPicker } from "react-colorful";
 import { v4 as uuid } from "uuid";
 import Toggle from "@atlaskit/toggle";
-
-const defaultSounds = [
-  {
-    id: "s1",
-    label: "",
-    isChecked: false,
-    rate: 50,
-  },
-  {
-    id: "s3",
-    label: "",
-    isChecked: false,
-    rate: 50,
-  },
-  {
-    id: "s4",
-    label: "",
-    isChecked: false,
-    rate: 50,
-  },
-  {
-    id: "s5",
-    label: "",
-    isChecked: false,
-    rate: 50,
-  },
-  {
-    id: "s6",
-    label: "",
-    isChecked: false,
-    rate: 50,
-  },
-  {
-    id: "s7",
-    label: "",
-    isChecked: false,
-    rate: 50,
-  },
-  {
-    id: "s8",
-    label: "",
-    isChecked: false,
-    rate: 50,
-  },
-  {
-    id: "s9",
-    label: "",
-    isChecked: false,
-    rate: 50,
-  },
-  {
-    id: "s10",
-    label: "",
-    isChecked: false,
-    rate: 50,
-  },
-];
+import { DEFAULT_ARROWS, DEFAULT_SOUNDS } from "@/constants";
 
 const SettingPage = () => {
   const router = useRouter();
@@ -76,11 +20,14 @@ const SettingPage = () => {
   const [colors, setColors] = useState([]);
   const [showAddColor, setShowAddColor] = useState(false);
 
-  const [sounds, setSounds] = useState(defaultSounds);
+  const [sounds, setSounds] = useState(DEFAULT_SOUNDS);
+
+  const [arrows, setArrows] = useState(DEFAULT_ARROWS);
 
   useEffect(() => {
     const storageColors = localStorage.getItem("colors");
     const storageSounds = localStorage.getItem("sounds");
+    const storageArrows = localStorage.getItem("arrows");
 
     if (storageColors) {
       const parsedColors = JSON.parse(storageColors);
@@ -90,6 +37,11 @@ const SettingPage = () => {
     if (storageSounds) {
       const parsedSounds = JSON.parse(storageSounds);
       setSounds(parsedSounds);
+    }
+
+    if (storageArrows) {
+      const parsed = JSON.parse(storageArrows);
+      setArrows(parsed);
     }
 
     setIsLoading(false);
@@ -103,18 +55,14 @@ const SettingPage = () => {
     setCanSave(false);
 
     if (colors.length) {
-      localStorage.setItem(
-        "colors",
-        JSON.stringify(colors.map((color) => ({ ...color })))
-      );
+      localStorage.setItem("colors", JSON.stringify(colors));
     }
 
     if (sounds.some((sound) => sound.isChecked)) {
-      localStorage.setItem(
-        "sounds",
-        JSON.stringify(sounds.map((sound) => ({ ...sound })))
-      );
+      localStorage.setItem("sounds", JSON.stringify(sounds));
     }
+
+    localStorage.setItem("arrows", JSON.stringify(arrows));
   }
 
   function addColor() {
@@ -205,6 +153,34 @@ const SettingPage = () => {
       };
       newSounds[index] = newSound;
       return newSounds;
+    });
+    setCanSave(true);
+  }
+
+  function updateArrowLabel(id, text) {
+    setArrows((prevArrows) => {
+      const newArrows = [...prevArrows];
+      const index = newArrows.findIndex((arrow) => arrow.id === id);
+      const newArrow = {
+        ...newArrows[index],
+        label: text,
+      };
+      newArrows[index] = newArrow;
+      return newArrows;
+    });
+    setCanSave(true);
+  }
+
+  function updateArrowRate(id, num) {
+    setArrows((prevArrows) => {
+      const newArrows = [...prevArrows];
+      const index = newArrows.findIndex((arrow) => arrow.id === id);
+      const newArrow = {
+        ...newArrows[index],
+        rate: num,
+      };
+      newArrows[index] = newArrow;
+      return newArrows;
     });
     setCanSave(true);
   }
@@ -316,7 +292,7 @@ const SettingPage = () => {
       </div>
 
       {/* Sounds Section */}
-      <div className="container flex flex-col justify-center py-8">
+      <div className="container flex flex-col justify-center py-8 ">
         <div className="text-xl font-semibold text-center mb-4">Sounds 🔊</div>
 
         <div className="flex flex-col justify-center items-center">
@@ -346,6 +322,36 @@ const SettingPage = () => {
               <Toggle
                 isChecked={sound.isChecked}
                 onChange={() => toggleSound(sound.id)}
+              />
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Arrows Section */}
+      <div className="border-gray-600 border-b-2" />
+      <div className="container flex flex-col justify-center py-8">
+        <div className="text-xl font-semibold text-center mb-4">Arrows ➡️</div>
+
+        <div className="flex flex-col justify-center items-center text-sm">
+          {arrows.map((arrow, index) => (
+            <div className="mb-4 flex items-center" key={arrow.id}>
+              <span className="font-bold w-20 mr-1">{arrow.id}</span>
+
+              <input
+                onChange={(e) => updateArrowLabel(arrow.id, e.target.value)}
+                value={arrow.label}
+                type="text"
+                className="ml-3 font-medium w-36 outline-none border-b border-black"
+                placeholder="Left block"
+              />
+
+              <input
+                value={arrow.rate}
+                onChange={(e) => updateArrowRate(arrow.id, +e.target.value)}
+                type="text"
+                placeholder="0 - 90"
+                className="border-b border-black w-10 mx-3 text-sm outline-none text-center"
               />
             </div>
           ))}

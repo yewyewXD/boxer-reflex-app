@@ -50,9 +50,12 @@ const StartPage = () => {
       return;
     }
 
-    const colors = [...JSON.parse(storageColors), ...storageArrows];
-    const sounds = JSON.parse(storageSounds).filter((sound) => sound.isChecked);
-    const allElements = [...colors, ...sounds];
+    const arrows = JSON.parse(storageArrows).filter((arrow) => arrow.rate > 0);
+    const colorsAndArrows = [...JSON.parse(storageColors), ...arrows];
+    const sounds = JSON.parse(storageSounds).filter(
+      (sound) => sound.isChecked && sound.rate > 0
+    );
+    const allElements = [...colorsAndArrows, ...sounds];
 
     let gameInterval;
     let gameTimeout;
@@ -79,7 +82,7 @@ const StartPage = () => {
           setDisplayedElement(newElement);
         }
 
-        if (colors.some((color) => color.id === newElement.id)) {
+        if (colorsAndArrows.some((color) => color.id === newElement.id)) {
           displayColor(newElement);
         } else {
           playSound(newElement);
