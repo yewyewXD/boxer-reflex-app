@@ -1,15 +1,64 @@
 "use client";
 
+import { useSearchParams } from "next/navigation";
 import React, { useEffect, useState } from "react";
 
-const GAME_MIN = 2;
-const gameDuration = GAME_MIN * 60 * 1000; // 2 minutes in milliseconds
-const gameDurationSeconds = GAME_MIN * 60; // 2 minutes in milliseconds
-const minInterval = 300;
-const maxInterval = 2000;
-const intervalRange = [minInterval, maxInterval]; // Random interval range in milliseconds
+const arrowElements = [
+  {
+    id: "arrowleft",
+    code: "url(/images/arrowleft.jpg) no-repeat center center / contain",
+    label: "",
+    rate: 50,
+  },
+  {
+    id: "arrowright",
+    code: "url(/images/arrowright.jpg) no-repeat center center / contain",
+    label: "",
+    rate: 50,
+  },
+  {
+    id: "arrowup",
+    code: "url(/images/arrowup.jpg) no-repeat center center / contain",
+    label: "",
+    rate: 50,
+  },
+  {
+    id: "arrowup2",
+    code: "url(/images/arrowup2.png) no-repeat center center / contain",
+    label: "",
+    rate: 50,
+  },
+  {
+    id: "arrowdown",
+    code: "url(/images/arrowdown.png) no-repeat center center / contain",
+    label: "",
+    rate: 50,
+  },
+  {
+    id: "arrowdown2",
+    code: "url(/images/arrowdown2.png) no-repeat center center / contain",
+    label: "",
+    rate: 50,
+  },
+
+  {
+    id: "arrowturn",
+    code: "url(/images/arrowturn.jpg) no-repeat center center / contain",
+    label: "",
+    rate: 50,
+  },
+];
 
 const StartPage = () => {
+  const searchParams = useSearchParams();
+  const GAME_MIN = +searchParams.get("minute");
+
+  const gameDuration = GAME_MIN * 60 * 1000; // 2 minutes in milliseconds
+  const gameDurationSeconds = GAME_MIN * 60; // 2 minutes in seconds
+  const minInterval = 500;
+  const maxInterval = 2000;
+  const intervalRange = [minInterval, maxInterval]; // Random interval range in milliseconds
+
   const [isLoading, setIsLoading] = useState(true);
   const [hasSettingErr, setHasSettingErr] = useState(false);
 
@@ -34,6 +83,9 @@ const StartPage = () => {
   const [currentInstruction, setCurrentInstruction] = useState("");
   const [secondsLeft, setSecondsLeft] = useState(gameDurationSeconds);
 
+  const minLeft = Math.floor(secondsLeft / 60);
+  const secLeft = secondsLeft - minLeft * 60;
+
   useEffect(() => {
     const storageColors = localStorage.getItem("colors");
     const storageSounds = localStorage.getItem("sounds");
@@ -44,7 +96,7 @@ const StartPage = () => {
       return;
     }
 
-    const colors = JSON.parse(storageColors);
+    const colors = [...JSON.parse(storageColors), ...arrowElements];
     const sounds = JSON.parse(storageSounds).filter((sound) => sound.isChecked);
 
     // Calculate total rates for both colors and sounds
@@ -73,16 +125,16 @@ const StartPage = () => {
           newElement = getRandomElement(sounds, totalSoundRate);
         }
 
-        while (
-          newElement === lastDisplayedElement ||
-          newElement === displayedElement
-        ) {
-          newElement = isColor
-            ? getRandomElement(colors, totalColorRate)
-            : getRandomElement(sounds, totalSoundRate);
-        }
+        // while (
+        //   newElement === lastDisplayedElement ||
+        //   newElement === displayedElement
+        // ) {
+        //   newElement = isColor
+        //     ? getRandomElement(colors, totalColorRate)
+        //     : getRandomElement(sounds, totalSoundRate);
+        // }
 
-        setDisplayedElement(newElement);
+        // setDisplayedElement(newElement);
         lastDisplayedElement = newElement;
 
         if (newElement) {
@@ -149,13 +201,17 @@ const StartPage = () => {
 
     setTimeout(() => {
       setCurrentColor("#fff");
+      setCurrentInstruction("");
     }, minInterval - 50);
   }
 
   function playSound(sound) {
     const audio = new Audio(`/sounds/${sound.id}.mp3`);
     audio.play();
-    setCurrentInstruction(sound.label);
+    setCurrentInstruction(`${sound.label} 🔊`);
+    setTimeout(() => {
+      setCurrentInstruction("");
+    }, minInterval - 50);
   }
 
   function onFinishCountdown() {
@@ -191,16 +247,18 @@ const StartPage = () => {
   return (
     <main>
       <div
-        className="container h-screen flex flex-col justify-between"
-        style={{ backgroundColor: currentColor }}
+        className="h-screen flex flex-col justify-between w-screen"
+        style={{ background: currentColor }}
       >
         <div className="text-lg font-semibold py-2 bg-white text-center">
-          {currentInstruction}
+          Time Left: {minLeft}min {secLeft}s
         </div>
 
-        <div className="text-lg font-semibold py-2 bg-white text-center">
-          Time Left: {secondsLeft}s
-        </div>
+        {currentInstruction && (
+          <div className="text-2xl flex-grow flex justify-center items-center text-white font-bold">
+            <div className="py-1 px-2 bg-black">{currentInstruction}</div>
+          </div>
+        )}
       </div>
     </main>
   );

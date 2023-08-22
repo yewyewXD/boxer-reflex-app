@@ -7,7 +7,6 @@ import { HexColorPicker } from "react-colorful";
 import { v4 as uuid } from "uuid";
 import Toggle from "@atlaskit/toggle";
 import Slider from "react-rangeslider";
-import "react-rangeslider/lib/index.css";
 
 const SettingPage = () => {
   const router = useRouter();
