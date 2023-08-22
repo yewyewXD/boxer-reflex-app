@@ -338,13 +338,13 @@ const SettingPage = () => {
             <div className="mb-4 flex items-center" key={arrow.id}>
               <span className="font-bold w-20 mr-1">{arrow.id}</span>
 
-              <input
+              {/* <input
                 onChange={(e) => updateArrowLabel(arrow.id, e.target.value)}
                 value={arrow.label}
                 type="text"
                 className="ml-3 font-medium w-36 outline-none border-b border-black"
                 placeholder="Left block"
-              />
+              /> */}
 
               <input
                 value={arrow.rate}
