@@ -230,7 +230,13 @@ const SettingPage = () => {
               <span className="ml-3 font-medium leading-none">
                 {color.label}
               </span>
-              <div className="flex-grow flex justify-end items-center">
+
+              <div className="flex-grow flex justify-end items-center text-sm">
+                <input
+                  type="number"
+                  placeholder="10 - 90"
+                  className="border-b border-black w-16 mr-3 outline-none text-center"
+                />
                 <button
                   onClick={() => onDeleteColor(color.id)}
                   className="border-2 border-gray-600 rounded-md flex justify-center items-center w-6 h-6 text-xs"
@@ -251,7 +257,7 @@ const SettingPage = () => {
                 className="border-2 border-black w-10 h-5 rounded-md relative cursor-pointer"
               >
                 {showColorPicker && (
-                  <div className="absolute top-8 left-0">
+                  <div className="absolute top-8 left-0 z-50">
                     <HexColorPicker
                       onClick={(e) => e.stopPropagation()}
                       color={newColor}

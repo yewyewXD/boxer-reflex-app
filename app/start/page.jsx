@@ -57,7 +57,6 @@ const StartPage = () => {
   const gameDurationSeconds = GAME_MIN * 60; // 2 minutes in seconds
   const minInterval = 500;
   const maxInterval = 2000;
-  const intervalRange = [minInterval, maxInterval]; // Random interval range in milliseconds
 
   const [isLoading, setIsLoading] = useState(true);
   const [hasSettingErr, setHasSettingErr] = useState(false);
@@ -98,53 +97,39 @@ const StartPage = () => {
 
     const colors = [...JSON.parse(storageColors), ...arrowElements];
     const sounds = JSON.parse(storageSounds).filter((sound) => sound.isChecked);
-
-    // Calculate total rates for both colors and sounds
-    const totalColorRate = colors.reduce(
-      (total, color) => total + color.rate,
-      0
-    );
-    const totalSoundRate = sounds.reduce(
-      (total, sound) => total + sound.rate,
-      0
-    );
+    const allElements = [...colors, ...sounds];
 
     let gameInterval;
     let gameTimeout;
+    let consecutiveCount = 0;
 
     const startGame = () => {
-      let lastDisplayedElement = null;
       gameInterval = setInterval(() => {
-        const isColor =
-          Math.random() < totalColorRate / (totalColorRate + totalSoundRate);
+        let newElement = getRandomElement(allElements);
 
-        let newElement;
-        if (isColor) {
-          newElement = getRandomElement(colors, totalColorRate);
+        if (newElement === displayedElement) {
+          consecutiveCount++;
         } else {
-          newElement = getRandomElement(sounds, totalSoundRate);
+          consecutiveCount = 0;
         }
 
-        // while (
-        //   newElement === lastDisplayedElement ||
-        //   newElement === displayedElement
-        // ) {
-        //   newElement = isColor
-        //     ? getRandomElement(colors, totalColorRate)
-        //     : getRandomElement(sounds, totalSoundRate);
-        // }
-
-        // setDisplayedElement(newElement);
-        lastDisplayedElement = newElement;
-
-        if (newElement) {
-          if (isColor) {
-            displayColor(newElement);
-          } else {
-            playSound(newElement);
-          }
+        if (consecutiveCount > 2) {
+          const nonRepeatingElements = allElements.filter(
+            (element) => element.id !== newElement.id
+          );
+          const nonRepeatRandomEl = getRandomElement(nonRepeatingElements);
+          newElement = nonRepeatRandomEl;
+          setDisplayedElement(nonRepeatRandomEl);
+        } else {
+          setDisplayedElement(newElement);
         }
-      }, Math.floor(Math.random() * (intervalRange[1] - intervalRange[0] + 1)) + intervalRange[0]);
+
+        if (colors.some((color) => color.id === newElement.id)) {
+          displayColor(newElement);
+        } else {
+          playSound(newElement);
+        }
+      }, Math.floor(Math.random() * (maxInterval - minInterval + 1)) + minInterval);
 
       gameTimeout = setTimeout(() => {
         clearInterval(gameInterval);
@@ -183,7 +168,11 @@ const StartPage = () => {
     };
   }, [gameStarted]);
 
-  function getRandomElement(elements, totalRate) {
+  function getRandomElement(elements) {
+    const totalRate = allElements.reduce(
+      (total, element) => total + element.rate,
+      0
+    );
     const randomNumber = Math.random() * totalRate;
     let cumulativeRate = 0;
 
