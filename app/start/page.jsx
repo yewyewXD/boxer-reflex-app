@@ -65,8 +65,6 @@ const StartPage = () => {
       gameInterval = setInterval(() => {
         let newElement = getRandomElement(allElements);
 
-        console.log({ newElement, displayedElement });
-
         if (newElement?.id === displayedElement?.id) {
           consecutiveCount++;
         } else {
