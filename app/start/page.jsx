@@ -1,16 +1,16 @@
-"use client";
+'use client';
 
-import { useSearchParams } from "next/navigation";
-import React, { useEffect, useState } from "react";
+import { useSearchParams } from 'next/navigation';
+import React, { useEffect, useState } from 'react';
 
 const StartPage = () => {
   const searchParams = useSearchParams();
-  const GAME_MIN = +searchParams.get("minute");
+  const GAME_MIN = +searchParams.get('minute');
+  const minInterval = +searchParams.get('min') * 1000;
+  const maxInterval = +searchParams.get('max') * 1000;
 
   const gameDuration = GAME_MIN * 60 * 1000; // 2 minutes in milliseconds
   const gameDurationSeconds = GAME_MIN * 60; // 2 minutes in seconds
-  const minInterval = 500;
-  const maxInterval = 2000;
 
   const [isLoading, setIsLoading] = useState(true);
   const [hasSettingErr, setHasSettingErr] = useState(false);
@@ -31,18 +31,17 @@ const StartPage = () => {
     return () => clearInterval(interval);
   }, [countDown]);
 
-  const [displayedElement, setDisplayedElement] = useState(null);
-  const [currentColor, setCurrentColor] = useState("#fff");
-  const [currentInstruction, setCurrentInstruction] = useState("");
+  const [currentColor, setCurrentColor] = useState('#fff');
+  const [currentInstruction, setCurrentInstruction] = useState('');
   const [secondsLeft, setSecondsLeft] = useState(gameDurationSeconds);
 
   const minLeft = Math.floor(secondsLeft / 60);
   const secLeft = secondsLeft - minLeft * 60;
 
   useEffect(() => {
-    const storageColors = localStorage.getItem("colors");
-    const storageSounds = localStorage.getItem("sounds");
-    const storageArrows = localStorage.getItem("arrows");
+    const storageColors = localStorage.getItem('colors');
+    const storageSounds = localStorage.getItem('sounds');
+    const storageArrows = localStorage.getItem('arrows');
 
     if (!storageColors || !storageSounds || !storageArrows) {
       setHasSettingErr(true);
@@ -60,12 +59,15 @@ const StartPage = () => {
     let gameInterval;
     let gameTimeout;
     let consecutiveCount = 0;
+    let displayedElement = null;
 
     const startGame = () => {
       gameInterval = setInterval(() => {
         let newElement = getRandomElement(allElements);
 
-        if (newElement === displayedElement) {
+        console.log({ newElement, displayedElement });
+
+        if (newElement?.id === displayedElement?.id) {
           consecutiveCount++;
         } else {
           consecutiveCount = 0;
@@ -77,9 +79,9 @@ const StartPage = () => {
           );
           const nonRepeatRandomEl = getRandomElement(nonRepeatingElements);
           newElement = nonRepeatRandomEl;
-          setDisplayedElement(nonRepeatRandomEl);
+          displayedElement = { ...nonRepeatRandomEl };
         } else {
-          setDisplayedElement(newElement);
+          displayedElement = { ...newElement };
         }
 
         if (colorsAndArrows.some((color) => color.id === newElement.id)) {
@@ -124,6 +126,7 @@ const StartPage = () => {
       clearInterval(gameCountdown);
       clearInterval(gameTimeout);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [gameStarted]);
 
   function getRandomElement(elements) {
@@ -147,8 +150,8 @@ const StartPage = () => {
     setCurrentInstruction(color.label);
 
     setTimeout(() => {
-      setCurrentColor("#fff");
-      setCurrentInstruction("");
+      setCurrentColor('#fff');
+      setCurrentInstruction('');
     }, minInterval - 50);
   }
 
@@ -157,7 +160,7 @@ const StartPage = () => {
     audio.play();
     setCurrentInstruction(`${sound.label} 🔊`);
     setTimeout(() => {
-      setCurrentInstruction("");
+      setCurrentInstruction('');
     }, minInterval - 50);
   }
 
