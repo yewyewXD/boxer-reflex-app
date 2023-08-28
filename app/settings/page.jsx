@@ -1,12 +1,12 @@
-"use client";
+'use client';
 
-import AddButton from "@/components/AddButton";
-import { useRouter } from "next/navigation";
-import React, { useEffect, useState } from "react";
-import { HexColorPicker } from "react-colorful";
-import { v4 as uuid } from "uuid";
-import Toggle from "@atlaskit/toggle";
-import { DEFAULT_ARROWS, DEFAULT_SOUNDS } from "@/constants";
+import AddButton from '@/components/AddButton';
+import { useRouter } from 'next/navigation';
+import React, { useEffect, useState } from 'react';
+import { HexColorPicker } from 'react-colorful';
+import { v4 as uuid } from 'uuid';
+import Toggle from '@atlaskit/toggle';
+import { DEFAULT_ARROWS, DEFAULT_SOUNDS } from '@/constants';
 
 const SettingPage = () => {
   const router = useRouter();
@@ -14,8 +14,8 @@ const SettingPage = () => {
   const [canSave, setCanSave] = useState(false);
 
   const [showColorPicker, setShowColorPicker] = useState(true);
-  const [newColor, setNewColor] = useState("#fff");
-  const [newColorName, setNewColorName] = useState("");
+  const [newColor, setNewColor] = useState('#fff');
+  const [newColorName, setNewColorName] = useState('');
 
   const [colors, setColors] = useState([]);
   const [showAddColor, setShowAddColor] = useState(false);
@@ -25,9 +25,9 @@ const SettingPage = () => {
   const [arrows, setArrows] = useState(DEFAULT_ARROWS);
 
   useEffect(() => {
-    const storageColors = localStorage.getItem("colors");
-    const storageSounds = localStorage.getItem("sounds");
-    const storageArrows = localStorage.getItem("arrows");
+    const storageColors = localStorage.getItem('colors');
+    const storageSounds = localStorage.getItem('sounds');
+    const storageArrows = localStorage.getItem('arrows');
 
     if (storageColors) {
       const parsedColors = JSON.parse(storageColors);
@@ -48,21 +48,21 @@ const SettingPage = () => {
   }, []);
 
   function goBack() {
-    router.push("/");
+    router.push('/');
   }
 
   function onSave() {
     setCanSave(false);
 
     if (colors.length) {
-      localStorage.setItem("colors", JSON.stringify(colors));
+      localStorage.setItem('colors', JSON.stringify(colors));
     }
 
     if (sounds.some((sound) => sound.isChecked)) {
-      localStorage.setItem("sounds", JSON.stringify(sounds));
+      localStorage.setItem('sounds', JSON.stringify(sounds));
     }
 
-    localStorage.setItem("arrows", JSON.stringify(arrows));
+    localStorage.setItem('arrows', JSON.stringify(arrows));
   }
 
   function addColor() {
@@ -84,6 +84,20 @@ const SettingPage = () => {
     setCanSave(true);
   }
 
+  function toggleColor(id) {
+    setColors((prevColors) => {
+      const newColors = [...prevColors];
+      const index = newColors.findIndex((color) => color.id === id);
+      const newColor = {
+        ...newColors[index],
+        isChecked: !newColors[index].isChecked,
+      };
+      newColors[index] = newColor;
+      return newColors;
+    });
+    setCanSave(true);
+  }
+
   function onSaveColor(e) {
     e.preventDefault();
     setColors((prevColors) => {
@@ -93,13 +107,14 @@ const SettingPage = () => {
           id: uuid(),
           code: newColor,
           label: newColorName,
+          isChecked: false,
         },
       ];
       return newColors;
     });
     setShowAddColor(false);
-    setNewColor("#fff");
-    setNewColorName("");
+    setNewColor('#fff');
+    setNewColorName('');
     setShowColorPicker(true);
   }
 
@@ -203,7 +218,7 @@ const SettingPage = () => {
             className="px-4 py-2 bg-green-400 rounded-md disabled:bg-gray-200 disabled:cursor-not-allowed text-sm font-medium"
             onClick={onSave}
           >
-            {canSave ? "Save" : "Saved"}
+            {canSave ? 'Save' : 'Saved'}
           </button>
         </div>
       </div>
@@ -232,6 +247,11 @@ const SettingPage = () => {
               </span>
 
               <div className="flex-grow flex justify-end items-center text-sm">
+                <Toggle
+                  isChecked={color.isChecked}
+                  onChange={() => toggleColor(color.id)}
+                />
+
                 <input
                   value={color.rate}
                   onChange={(e) => updateColorRate(color.id, +e.target.value)}
@@ -299,7 +319,7 @@ const SettingPage = () => {
           {sounds.map((sound, index) => (
             <div className="mb-4 flex items-center" key={sound.id}>
               <span className="font-bold w-12">
-                {index + 1}.{" "}
+                {index + 1}.{' '}
                 <button onClick={() => playSound(sound.id)}> 🔉</button>
               </span>
 

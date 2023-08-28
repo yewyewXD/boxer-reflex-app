@@ -49,12 +49,14 @@ const StartPage = () => {
       return;
     }
 
-    const arrows = JSON.parse(storageArrows).filter((arrow) => arrow.rate > 0);
-    const colorsAndArrows = [...JSON.parse(storageColors), ...arrows];
-    const sounds = JSON.parse(storageSounds).filter(
-      (sound) => sound.isChecked && sound.rate > 0
+    const colorsAndArrows = [
+      ...JSON.parse(storageColors),
+      ...JSON.parse(storageArrows),
+    ];
+    const sounds = JSON.parse(storageSounds);
+    const allElements = [...colorsAndArrows, ...sounds].filter(
+      (element) => element.isChecked
     );
-    const allElements = [...colorsAndArrows, ...sounds];
 
     let gameInterval;
     let consecutiveCount = 0;
