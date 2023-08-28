@@ -5,12 +5,12 @@ import React, { useEffect, useState } from 'react';
 
 const StartPage = () => {
   const searchParams = useSearchParams();
-  const GAME_MIN = +searchParams.get('minute');
+  const gameTotalMin = +searchParams.get('minute');
   const minInterval = +searchParams.get('min') * 1000;
   const maxInterval = +searchParams.get('max') * 1000;
 
-  const gameDuration = GAME_MIN * 60 * 1000; // 2 minutes in milliseconds
-  const gameDurationSeconds = GAME_MIN * 60; // 2 minutes in seconds
+  const gameDuration = gameTotalMin * 60 * 1000; // 2 minutes in milliseconds
+  const gameDurationSeconds = gameTotalMin * 60; // 2 minutes in seconds
 
   const [isLoading, setIsLoading] = useState(true);
   const [hasSettingErr, setHasSettingErr] = useState(false);
@@ -57,73 +57,85 @@ const StartPage = () => {
     const allElements = [...colorsAndArrows, ...sounds];
 
     let gameInterval;
-    let gameTimeout;
     let consecutiveCount = 0;
     let displayedElement = null;
 
-    const startGame = () => {
-      gameInterval = setInterval(() => {
-        let newElement = getRandomElement(allElements);
+    const startRandomInterval = () => {
+      console.log('training started!');
+      let timeout;
 
-        if (newElement?.id === displayedElement?.id) {
-          consecutiveCount++;
-        } else {
-          consecutiveCount = 0;
-        }
+      const runInterval = () => {
+        const timeoutFunction = () => {
+          let newElement = getRandomElement(allElements);
 
-        if (consecutiveCount > 2) {
-          const nonRepeatingElements = allElements.filter(
-            (element) => element.id !== newElement.id
-          );
-          const nonRepeatRandomEl = getRandomElement(nonRepeatingElements);
-          newElement = nonRepeatRandomEl;
-          displayedElement = { ...nonRepeatRandomEl };
-        } else {
-          displayedElement = { ...newElement };
-        }
+          if (newElement?.id === displayedElement?.id) {
+            consecutiveCount++;
+          } else {
+            consecutiveCount = 0;
+          }
 
-        if (colorsAndArrows.some((color) => color.id === newElement.id)) {
-          displayColor(newElement);
-        } else {
-          playSound(newElement);
-        }
-      }, Math.floor(Math.random() * (maxInterval - minInterval + 1)) + minInterval);
+          if (consecutiveCount > 2) {
+            const nonRepeatingElements = allElements.filter(
+              (element) => element.id !== newElement.id
+            );
+            const nonRepeatRandomEl = getRandomElement(nonRepeatingElements);
+            newElement = nonRepeatRandomEl;
+            displayedElement = { ...nonRepeatRandomEl };
+          } else {
+            displayedElement = { ...newElement };
+          }
 
-      gameTimeout = setTimeout(() => {
-        clearInterval(gameInterval);
-      }, gameDuration);
+          if (colorsAndArrows.some((color) => color.id === newElement.id)) {
+            displayColor(newElement);
+          } else {
+            playSound(newElement);
+          }
+
+          // do the next move
+          runInterval();
+        };
+
+        const delay =
+          Math.floor(Math.random() * (maxInterval - minInterval + 1)) +
+          minInterval;
+
+        timeout = setTimeout(timeoutFunction, delay);
+      };
+
+      // initiate the first move
+      runInterval();
+
+      return {
+        clear() {
+          console.log('training finished!');
+          clearTimeout(timeout);
+        },
+      };
     };
 
     setIsLoading(false);
 
+    let gameCountdown;
+    let gameTimeout;
     if (gameStarted) {
-      startGame();
+      gameInterval = startRandomInterval();
+      gameCountdown = setInterval(() => {
+        setSecondsLeft((sec) => sec - 1);
+      }, 1000);
+
+      // trigger when game is finished
+      gameTimeout = setTimeout(() => {
+        gameInterval?.clear?.();
+        clearInterval(gameCountdown);
+      }, gameDuration);
     }
 
     return () => {
-      clearInterval(gameInterval);
-      clearInterval(gameTimeout);
+      gameInterval?.clear?.();
+      clearTimeout(gameTimeout);
+      clearTimeout(gameCountdown);
     };
 
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [gameStarted]);
-
-  // Game count down
-  useEffect(() => {
-    if (!gameStarted) return;
-
-    const gameCountdown = setInterval(() => {
-      setSecondsLeft((sec) => sec - 1);
-    }, 1000);
-
-    const gameTimeout = setTimeout(() => {
-      clearInterval(gameCountdown);
-    }, gameDuration);
-
-    return () => {
-      clearInterval(gameCountdown);
-      clearInterval(gameTimeout);
-    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [gameStarted]);
 
