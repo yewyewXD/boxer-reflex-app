@@ -4,36 +4,42 @@ export const DEFAULT_ARROWS = [
     code: 'url(/images/arrowleft.jpg) no-repeat center center / contain',
     label: '',
     rate: 50,
+    isChecked: false,
   },
   {
     id: 'arrowright',
     code: 'url(/images/arrowright.jpg) no-repeat center center / contain',
     label: '',
     rate: 50,
+    isChecked: false,
   },
   {
     id: 'arrowup',
     code: 'url(/images/arrowup.jpg) no-repeat center center / contain',
     label: '',
     rate: 50,
+    isChecked: false,
   },
   {
     id: 'arrowup2',
     code: 'url(/images/arrowup2.png) no-repeat center center / contain',
     label: '',
     rate: 50,
+    isChecked: false,
   },
   {
     id: 'arrowdown',
     code: 'url(/images/arrowdown.png) no-repeat center center / contain',
     label: '',
     rate: 50,
+    isChecked: false,
   },
   {
     id: 'arrowdown2',
     code: 'url(/images/arrowdown2.png) no-repeat center center / contain',
     label: '',
     rate: 50,
+    isChecked: false,
   },
 
   {
@@ -41,6 +47,7 @@ export const DEFAULT_ARROWS = [
     code: 'url(/images/arrowturn.jpg) no-repeat center center / contain',
     label: '',
     rate: 50,
+    isChecked: false,
   },
 ];
 

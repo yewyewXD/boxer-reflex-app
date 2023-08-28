@@ -172,13 +172,13 @@ const SettingPage = () => {
     setCanSave(true);
   }
 
-  function updateArrowLabel(id, text) {
+  function toggleArrow(id) {
     setArrows((prevArrows) => {
       const newArrows = [...prevArrows];
       const index = newArrows.findIndex((arrow) => arrow.id === id);
       const newArrow = {
         ...newArrows[index],
-        label: text,
+        isChecked: !newArrows[index].isChecked,
       };
       newArrows[index] = newArrow;
       return newArrows;
@@ -372,6 +372,11 @@ const SettingPage = () => {
                 type="text"
                 placeholder="0 - 90"
                 className="border-b border-black w-10 mx-3 text-sm outline-none text-center"
+              />
+
+              <Toggle
+                isChecked={arrow.isChecked}
+                onChange={() => toggleArrow(arrow.id)}
               />
             </div>
           ))}
